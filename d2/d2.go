@@ -49,26 +49,13 @@ func Solve(fileName string, first bool) int {
 				}
 			}
 
-			testing := false
-
-			if numberAsString == "824824824" {
-				helpers.LogLine("Evaluating 824824824")
-				testing = true
-			}
-
 			// p2
 			for j := 0; j < stringLength/2; j++ {
-				if testing {
-					helpers.LogLine(stringLength % (j + 1))
-				}
 				if stringLength%(j+1) != 0 {
 					continue
 				}
 
 				occurrences := strings.Count(numberAsString, numberAsString[0:j+1])
-				if testing {
-					helpers.LogLine("testing r2 number", i, "\n\toccurrences", occurrences, "\n\tstringlength", stringLength, "\n\texpected occurrences", stringLength/(j+1), "\n\trecurring number", numberAsString[0:j+1])
-				}
 				if occurrences == stringLength/(j+1) {
 					helpers.LogLine("found r2 number", i, "\n\toccurrences", occurrences, "\n\tstringlength", stringLength, "\n\texpected occurrences", stringLength/(j+1), "\n\trecurring number", numberAsString[0:j+1])
 					r2 += i
