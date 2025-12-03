@@ -26,6 +26,8 @@ func RunTests(tests []Testcase, method Solver, versionIndicator bool) int {
 			log.Fatal("Test failed", testcase, result)
 			errors += 1
 		}
+
+		fmt.Println("Test succeeded", testcase.FileName)
 	}
 
 	return errors
