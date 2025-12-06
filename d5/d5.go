@@ -10,6 +10,15 @@ import (
 	"strings"
 )
 
+func checkInclusion(ranges [][]int, number int) bool {
+	for _, v := range ranges {
+		if v[0] <= number && number <= v[1] {
+			return true
+		}
+	}
+	return false
+}
+
 func Solve(fileName string, first bool) int {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -20,7 +29,7 @@ func Solve(fileName string, first bool) int {
 	scanner := bufio.NewScanner(file)
 	r1 := 0
 	r2 := 0
-	set := map[int]bool{}
+	ranges := [][]int{}
 	for scanner.Scan() {
 		freshRange := scanner.Text()
 		if freshRange == "" {
@@ -29,19 +38,14 @@ func Solve(fileName string, first bool) int {
 		startEnd := strings.Split(freshRange, "-")
 		start, _ := strconv.Atoi(startEnd[0])
 		end, _ := strconv.Atoi(startEnd[1])
-		for i := start; i <= end; i++ {
-			_, ok := set[i]
-			if !ok {
-				set[i] = true
-			}
-		}
+		ranges = append(ranges, []int{start, end})
 	}
 
-	helpers.LogLine("Checking ids, size of set is", len(set))
+	helpers.LogLine("Checking ids, size of set is", len(ranges))
 
 	for scanner.Scan() {
 		id, _ := strconv.Atoi(scanner.Text())
-		_, ok := set[id]
+		ok := checkInclusion(ranges, id)
 		if ok {
 			r1 += 1
 		}
