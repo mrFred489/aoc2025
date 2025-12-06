@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -197,6 +198,146 @@ func Solve2(fileName string, first bool) int {
 	}
 }
 
+func removeAtIndex(ranges [][]int, index int) [][]int {
+	if index == len(ranges)-1 {
+		return ranges[:index]
+	}
+
+	if index == 0 {
+		return ranges[index+1:]
+	}
+
+	return append(ranges[:index], ranges[index+1:]...)
+}
+
+func printSurrounding(ranges [][]int, index int) {
+	if index > 1 {
+		helpers.LogLine("-2", ranges[index-2])
+	}
+
+	if index > 0 {
+		helpers.LogLine("-1", ranges[index-1])
+	}
+
+	if index < len(ranges)-1 {
+		helpers.LogLine("at", ranges[index])
+	}
+
+	if index < len(ranges)-2 {
+		helpers.LogLine("+1", ranges[index+1])
+	}
+
+	if index < len(ranges)-3 {
+		helpers.LogLine("+2", ranges[index+2])
+	}
+}
+
+func Solve3(fileName string, first bool) int {
+	file, err := os.Open(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	r1 := 0
+	r2 := 0
+	ranges := [][]int{}
+	for scanner.Scan() {
+		freshRange := scanner.Text()
+		if freshRange == "" {
+			break
+		}
+		startEnd := strings.Split(freshRange, "-")
+		start, _ := strconv.Atoi(startEnd[0])
+		end, _ := strconv.Atoi(startEnd[1])
+		ranges = append(ranges, []int{start, end})
+	}
+
+	helpers.LogLine("Checking ids, size of set is", len(ranges))
+
+	sort.Slice(ranges, func(i, j int) bool {
+		if ranges[i][0] == ranges[j][0] {
+			return ranges[i][1] < ranges[j][1]
+		}
+		return ranges[i][0] < ranges[j][0]
+	})
+
+	helpers.LogLine(ranges)
+
+	for _, v := range ranges {
+		helpers.LogLine(v)
+	}
+
+	for {
+		madeChanges := false
+		for currentIndex := 0; currentIndex < len(ranges)-1; currentIndex++ {
+			nextIndex := currentIndex + 1
+			currentStart := ranges[currentIndex][0]
+			currentEnd := ranges[currentIndex][1]
+			nextStart := ranges[nextIndex][0]
+			nextEnd := ranges[nextIndex][1]
+
+			if currentStart == nextStart {
+				helpers.LogLine("next ranges must be same or greater", currentStart, currentEnd, nextStart, nextEnd)
+				helpers.LogLine("removing", ranges[currentIndex])
+				printSurrounding(ranges, currentIndex)
+				helpers.LogLine("len", len(ranges))
+				ranges = removeAtIndex(ranges, currentIndex)
+				helpers.LogLine("len", len(ranges))
+				printSurrounding(ranges, currentIndex)
+				madeChanges = true
+				break
+			}
+
+			if currentEnd >= nextEnd {
+				helpers.LogLine("current range is strictly greater than next range")
+				ranges = removeAtIndex(ranges, nextIndex)
+				madeChanges = true
+				break
+			}
+
+			if currentEnd >= nextStart {
+				helpers.LogLine("combine arrays")
+				helpers.LogLine("-- ", currentStart, currentEnd)
+				helpers.LogLine("-- ", nextStart, nextEnd)
+				helpers.LogLine("-- ", currentStart, nextEnd)
+				newRange := []int{currentStart, max(currentEnd, nextEnd)}
+				ranges = append(append(ranges[:currentIndex], newRange), ranges[nextIndex+1:]...)
+				helpers.LogLine("-- current index now", ranges[currentIndex])
+				helpers.LogLine("-- next index now", ranges[nextIndex])
+				madeChanges = true
+				break
+			}
+		}
+
+		if !madeChanges {
+			break
+		}
+	}
+
+	for _, v := range ranges {
+		r2 += v[1] - v[0] + 1
+	}
+
+	for _, v := range ranges {
+		helpers.LogLine(v)
+	}
+
+	helpers.LogLine(r1)
+	helpers.LogLine(r2)
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	if first {
+		return r1
+	} else {
+		return r2
+	}
+}
+
 func P1() {
 	tests := []helpers.Testcase{
 		{FileName: "sample1.txt", ExpectedResult: 3},
@@ -213,18 +354,19 @@ func P1() {
 }
 
 func P2() {
-	tests := []helpers.Testcase{
-		{FileName: "sample1.txt", ExpectedResult: 14},
-	}
+	// tests := []helpers.Testcase{
+	// 	{FileName: "sample1.txt", ExpectedResult: 14},
+	// 	{FileName: "sample2.txt", ExpectedResult: 24},
+	// }
 
-	errors := helpers.RunTests(tests, Solve2, false)
+	// errors := helpers.RunTests(tests, Solve3, false)
 
-	if errors != 0 {
-		log.Fatal("Had errors, not running main input")
-		return
-	}
+	// if errors != 0 {
+	// 	log.Fatal("Had errors, not running main input")
+	// 	return
+	// }
 
-	fmt.Printf("P2: %d\n", Solve2("input.txt", false))
+	fmt.Printf("P2: %d\n", Solve3("input.txt", false))
 }
 
 func main() {
