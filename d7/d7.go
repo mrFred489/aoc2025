@@ -95,30 +95,55 @@ func Solve2(fileName string, first bool) int {
 	r2 := 0
 	scanner.Scan()
 	firstLine := scanner.Text()
-	indexesCurrentLine := []int{strings.Index(firstLine, "S")}
+	initialIndex := strings.Index(firstLine, "S")
+	indexesCurrentLine := []int{initialIndex}
+	timelines := map[int]int{}
+	timelines[initialIndex] = 1
 
 	for scanner.Scan() {
-		indexesNextLine := []int{}
+		indexesNextLine := map[int]bool{}
+		timelinesNextLine := map[int]int{}
 		line := scanner.Text()
+		helpers.LogLine(line)
+		helpers.LogLine(indexesCurrentLine)
+		helpers.LogLine(timelines)
 		for _, index := range indexesCurrentLine {
+			timelinesForIndex := timelines[index]
 			if string(line[index]) == "." {
-				indexesNextLine = append(indexesNextLine, index)
+				indexesNextLine = addToSet(indexesNextLine, index)
+				timelinesNextLine[index] = timelinesNextLine[index] + timelinesForIndex
+				helpers.LogLine("Merging straight", index, timelinesNextLine[index], timelinesForIndex)
 			} else {
 				left := index - 1
 				right := index + 1
 				if left >= 0 {
-					indexesNextLine = append(indexesNextLine, left)
+					prevLen := len(indexesNextLine)
+					indexesNextLine = addToSet(indexesNextLine, left)
+					if len(indexesNextLine) == prevLen {
+						timelinesNextLine[left] = timelinesNextLine[left] + timelinesForIndex
+					} else {
+						timelinesNextLine[index] = timelinesForIndex
+					}
 				}
 				if right < len(line) {
-					indexesNextLine = append(indexesNextLine, right)
+					prevLen := len(indexesNextLine)
+					indexesNextLine = addToSet(indexesNextLine, right)
+					if len(indexesNextLine) == prevLen {
+						timelinesNextLine[right] = timelinesNextLine[right] + timelinesForIndex
+					} else {
+						timelinesNextLine[index] = timelinesForIndex
+					}
 				}
 			}
 		}
 
-		indexesCurrentLine = indexesNextLine
+		indexesCurrentLine = getKeysFromMap(indexesNextLine)
+		timelines = timelinesNextLine
 	}
 
-	r2 = len(indexesCurrentLine)
+	for _, v := range timelines {
+		r2 += timelines[v]
+	}
 
 	helpers.LogLine(r1)
 	helpers.LogLine(r2)
