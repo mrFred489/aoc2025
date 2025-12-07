@@ -117,32 +117,24 @@ func Solve2(fileName string, first bool) int {
 				left := index - 1
 				right := index + 1
 				if left >= 0 {
-					prevLen := len(indexesNextLine)
 					indexesNextLine = addToSet(indexesNextLine, left)
-					if len(indexesNextLine) == prevLen {
-						timelinesNextLine[left] = timelinesNextLine[left] + timelinesForIndex
-					} else {
-						timelinesNextLine[index] = timelinesForIndex
-					}
+					timelinesNextLine[left] = timelinesNextLine[left] + timelinesForIndex
 				}
 				if right < len(line) {
-					prevLen := len(indexesNextLine)
 					indexesNextLine = addToSet(indexesNextLine, right)
-					if len(indexesNextLine) == prevLen {
-						timelinesNextLine[right] = timelinesNextLine[right] + timelinesForIndex
-					} else {
-						timelinesNextLine[index] = timelinesForIndex
-					}
+					timelinesNextLine[right] = timelinesNextLine[right] + timelinesForIndex
 				}
 			}
 		}
 
 		indexesCurrentLine = getKeysFromMap(indexesNextLine)
 		timelines = timelinesNextLine
+		helpers.LogLine("timelines", timelines)
 	}
 
 	for _, v := range timelines {
-		r2 += timelines[v]
+		helpers.LogLine("summing", v, timelines[v])
+		r2 += v
 	}
 
 	helpers.LogLine(r1)
